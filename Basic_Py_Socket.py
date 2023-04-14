@@ -28,6 +28,7 @@ class App:
                 break
             data_str = data.decode('utf-8')
             self.text_box.insert(tk.END, data_str)
+            self.text_box.see(tk.END)
 
     def send(self, event):
         key = event.char
