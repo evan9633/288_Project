@@ -20,6 +20,9 @@ class App:
 
         self.receive_thread = threading.Thread(target=self.receive_data)
         self.receive_thread.start()
+        self.width = None
+        self.angle = None
+        self.dist = None
 
     def receive_data(self):
         while True:
@@ -30,6 +33,28 @@ class App:
             self.text_box.insert(tk.END, data_str)
             self.text_box.see(tk.END)
 
+            # split the data string into individual data members
+            data_members = data_str.strip().split(';')
+            for member in data_members:
+                # split each data member into its key and value
+                key, value = member.strip().split(':')
+                if key == 'width':
+                    self.width = float(value)
+                elif key == 'angle':
+                    self.angle = float(value)
+                elif key == 'dist':
+                    self.dist = float(value)
+
+            # check if all data members have been received and process them
+            if self.width is not None and self.angle is not None and self.dist is not None:
+                # create a new object with the data members
+                data_obj = {'width': self.width, 'angle': self.angle, 'dist': self.dist}
+                # do something with the data object, such as store it in a list or pass it to another function
+                print(data_obj)
+                # reset the data members to None for the next data object
+                self.width = None
+                self.angle = None
+                self.dist = None
     def send(self, event):
         key = event.char
         if key:
