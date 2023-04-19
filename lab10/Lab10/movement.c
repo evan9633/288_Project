@@ -2,7 +2,7 @@
  * movement.c
  *
  *  Created on: Jan 31, 2023
- *      Author: akronau
+ *      Author: Brock Dykhuis
  */
 
 #include "Timer.h"
@@ -10,49 +10,88 @@
 #include "movement.h"
 #include "open_interface.h"
 
-    void move_forward(oi_t *sensor, double distance_num){
-        double sum = 0;
-        double tempsum = 0;
+#define TAPEVALUE 470 //STILL NEED TAPE VALUE
+    oi_t* sensor;
+
+    void movement_init(oi_t* s) {
+        sensor = s;
+    }
+
+    void move_forward(double distance_num){
+        int bot_distance = 0;
         oi_setWheels(50,50);
-        while(sum < distance_num){
+
+        while(check_Interrupts() == 0 && bot_distance < distance_num) {//STILL NEED TO CALIBRATE
             oi_update(sensor);
-            sum += sensor -> distance;
+            bot_distance += sensor -> distance;
         }
 
         oi_setWheels(0,0);
     }
 
 
-        void turn_right(oi_t *sensor, double degrees){
-            double sum = 0;
-            oi_setWheels(-100,100);
-            while(sum > degrees){
+        void turn_right(double degrees){
+            double bot_angle = 0;
+            oi_setWheels(-50,50);
+
+            while(check_Interrupts() == 0 && bot_angle > degrees * -1) {//STILL NEED TO CALIBRATE
                 oi_update(sensor);
-                sum += sensor -> angle;
+                bot_angle += sensor -> angle;
             }
             oi_setWheels(0,0);
         }
 
-        void turn_left(oi_t *sensor, double degrees){
-        double sum = 0;
-        oi_setWheels(100,-100);
-        while(sum < degrees){
+        void turn_left(double degrees){
+        double bot_angle = 0;
+        oi_setWheels(50,-50);
+        while(check_Interrupts() == 0 && bot_angle > degrees * 1) {//STILL NEED TO CALIBRATE
             oi_update(sensor);
-            sum += sensor -> angle;
+            bot_angle += sensor -> angle;
         }
 
         oi_setWheels(0,0);
         }
 
-        void move_backward(oi_t *sensor,double distance_num){
-            double sum = 0;
-            oi_setWheels(-500,-500);
-            while(sum > distance_num*-1){
+        void move_backward(double distance_num){
+            int bot_distance = 0;
+            oi_setWheels(-50,-50);
+            while(check_Interrupts() == 0 && bot_distance > distance_num * -1) {//STILL NEED TO CALIBRATE
                 oi_update(sensor);
-                sum += sensor -> distance;
+                bot_distance += sensor -> distance;
             }
 
             oi_setWheels(0,0);
 
         }
 
+
+        int check_Interrupts() {
+
+            if (sensor -> wheelDropLeft || sensor -> cliffFrontLeft || sensor -> cliffLeft || sensor -> bumpLeft) {
+
+                move_backward(10);
+                return 1;
+            } else if (sensor -> wheelDropRight || sensor -> cliffFrontRight || sensor -> cliffRight || sensor -> bumpRight) {
+
+                move_backward(10);
+                return 2;
+            } else if (sensor -> cliffLeftSignal > TAPEVALUE) {
+
+                move_backward(10);
+                return 3;
+            } else if (sensor -> cliffFrontLeftSignal > TAPEVALUE) {
+
+                move_backward(10);
+                return 4;
+            } else if (sensor -> cliffFrontRightSignal > TAPEVALUE) {
+
+                move_backward(10);
+                return 5;
+            } else if (sensor -> cliffRightSignal > TAPEVALUE) {
+
+                move_backward(10);
+                return 6;
+            }
+
+            return 0;
+        }
