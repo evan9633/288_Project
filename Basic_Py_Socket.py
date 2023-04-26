@@ -41,9 +41,10 @@ class App:
 
                 # initialize plot
             fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
-            ax.set_ylim([0,4]) # set y-axis limits
-
-
+            ax.set_ylim([-10,10]) # set y-axis limits
+            ax.set_xlim([-10,10]) # set x-axis limits
+            if len(data_members < 2):
+                continue
             for member in data_members:
                 # split each data member into its key and value
                 key, value = member.strip().split(':')
@@ -55,9 +56,12 @@ class App:
                     self.dist = float(value)
                 elif key == 'tape':
                     self.tape = str(value)
-                x = dist * np.cos(np.radians(angle))
-                y = dist * np.sin(np.radians(angle))
-                ax.plot([0, x], [0, y], linewidth=width, alpha=0.5)
+                if self.angle is not None:
+                    x = dist * np.cos(np.radians(angle))
+                if self.angle is not None:
+                    y = dist * np.sin(np.radians(angle))
+                if self.angle is not None:
+                    ax.plot([0, x], [0, y], linewidth=width, alpha=0.5)
                 #plot coordinates in real time
 
                 plt.pause(0.001)
