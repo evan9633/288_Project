@@ -38,19 +38,18 @@ class App:
 
             # split the data string into individual data members
             data_members = data_str.strip().split(';')
-            member_list = data_str.strip().split(':')
+            #member_list = data_str.strip().split(':')
                 # initialize plot
             fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
             ax.set_ylim([-10,10]) # set y-axis limits
             ax.set_xlim([-10,10]) # set x-axis limits
-            if len(member_list < 2):
-                continue
+           
             for member in data_members:
                 # split each data member into its key and value
                 key, value = member.strip().split(':')
-               # if key == 'width':
-                   # self.width = float(value)
-                if key == 'angle':
+                if key == 'width':
+                   self.width = float(value)
+                elif key == 'angle':
                     self.angle = float(value)
                 elif key == 'dist':
                     self.dist = float(value)
@@ -62,6 +61,7 @@ class App:
                     y = dist * np.sin(np.radians(angle))
                 if self.angle is not None:
                     ax.plot([0, x], [0, y], linewidth=width, alpha=0.5)
+                
                 #plot coordinates in real time
 
                 plt.pause(0.001)
