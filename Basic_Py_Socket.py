@@ -25,6 +25,7 @@ class App:
         self.width = None
         self.angle = None
         self.dist = None
+        self.tape = None
 
     def receive_data(self):
         while True:
@@ -52,6 +53,8 @@ class App:
                     self.angle = float(value)
                 elif key == 'dist':
                     self.dist = float(value)
+                elif key == 'tape':
+                    self.tape = value
                 x = dist * np.cos(np.radians(angle))
                 y = dist * np.sin(np.radians(angle))
                 ax.plot([0, x], [0, y], linewidth=width, alpha=0.5)
