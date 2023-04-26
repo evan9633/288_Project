@@ -54,7 +54,7 @@ class App:
                 elif key == 'dist':
                     self.dist = float(value)
                 elif key == 'tape':
-                    self.tape = value
+                    self.tape = str(value)
                 x = dist * np.cos(np.radians(angle))
                 y = dist * np.sin(np.radians(angle))
                 ax.plot([0, x], [0, y], linewidth=width, alpha=0.5)
@@ -76,7 +76,7 @@ class App:
                 self.angle = None
                 self.dist = None
 
-    plt.show()
+        plt.show()
     def send(self, event):
         key = event.char
         if key:
