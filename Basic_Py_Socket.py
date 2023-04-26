@@ -35,6 +35,12 @@ class App:
 
             # split the data string into individual data members
             data_members = data_str.strip().split(';')
+
+                # initialize plot
+            fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
+            ax.set_ylim([0,4]) # set y-axis limits
+
+
             for member in data_members:
                 # split each data member into its key and value
                 key, value = member.strip().split(':')
@@ -44,6 +50,15 @@ class App:
                     self.angle = float(value)
                 elif key == 'dist':
                     self.dist = float(value)
+                x = dist * np.cos(np.radians(angle))
+                y = dist * np.sin(np.radians(angle))
+                ax.plot([0, x], [0, y], linewidth=width, alpha=0.5)
+                #plot coordinates in real time
+
+                plt.pause(0.001)
+
+                #update plot
+
 
             # check if all data members have been received and process them
             if self.width is not None and self.angle is not None and self.dist is not None:
@@ -55,6 +70,8 @@ class App:
                 self.width = None
                 self.angle = None
                 self.dist = None
+
+    plt.show()
     def send(self, event):
         key = event.char
         if key:
