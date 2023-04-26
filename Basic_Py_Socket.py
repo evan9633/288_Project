@@ -22,7 +22,7 @@ class App:
 
         self.receive_thread = threading.Thread(target=self.receive_data)
         self.receive_thread.start()
-        self.width = None
+      #  self.width = None
         self.angle = None
         self.dist = None
         self.tape = None
@@ -38,19 +38,19 @@ class App:
 
             # split the data string into individual data members
             data_members = data_str.strip().split(';')
-
+            member_list = data_str.strip().split(':')
                 # initialize plot
             fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
             ax.set_ylim([-10,10]) # set y-axis limits
             ax.set_xlim([-10,10]) # set x-axis limits
-            if len(data_members < 2):
+            if len(member_list < 2):
                 continue
             for member in data_members:
                 # split each data member into its key and value
                 key, value = member.strip().split(':')
-                if key == 'width':
-                    self.width = float(value)
-                elif key == 'angle':
+               # if key == 'width':
+                   # self.width = float(value)
+                if key == 'angle':
                     self.angle = float(value)
                 elif key == 'dist':
                     self.dist = float(value)
