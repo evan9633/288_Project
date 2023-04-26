@@ -29,15 +29,21 @@ class App:
 
     def receive_data(self):
         while True:
+            data_bfr = ''
             data = self.socket.recv(1024)
             if not data:
                 break
             data_str = data.decode('utf-8')
+            data_bfr += data_str
             self.text_box.insert(tk.END, data_str)
             self.text_box.see(tk.END)
 
             # split the data string into individual data members
             data_members = data_str.strip().split(';')
+
+            if not data_str.endswith(';'):
+                data_bfr = data_members.pop()
+
             #member_list = data_str.strip().split(':')
                 # initialize plot
             fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
@@ -55,6 +61,7 @@ class App:
                     self.dist = float(value)
                 elif key == 'tape':
                     self.tape = str(value)
+                
                 if self.angle is not None:
                     x = dist * np.cos(np.radians(angle))
                 if self.angle is not None:
@@ -64,7 +71,7 @@ class App:
                 
                 #plot coordinates in real time
 
-                plt.pause(0.001)
+                self.anim = animation.FuncAnimation(self.fig, self.update_plot, interval=1, blit=True)
 
                 #update plot
 
