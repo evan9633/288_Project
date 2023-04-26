@@ -1,0 +1,36 @@
+move forward 
+q = 2
+w = 5 
+e = 7 
+r = 10
+t = 15 
+y = 20 
+u = 25 
+i = 30 
+o = 35
+
+move backwards
+a = 2
+s = 5
+d = 7
+f = 10
+g = 15
+h = 20
+j = 25
+k = 30
+l = 35
+
+turning right 
+z = 15
+x = 45
+c = 60
+v = 90
+
+
+turn left
+b = 15
+n = 45
+m = 60
+, = 90 
+
+scan = p
