@@ -35,11 +35,26 @@ class App:
         self.drop = None
         self.bump = None
 
+         #self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #self.socket.connect(('192.168.1.1', 288))
+        self.receive_thread = threading.Thread(target=self.receive_data)
+        self.receive_thread.start()
+        plt.show
 
     def receive_data(self):
         while True:
+            #data = self.socket.recv(1024)
+           # if not data:
+           #     break
+
+
+            while ';' not in data_str and ':' not in data_str:
+                #data += self.socket.recv(1024)
+                #data_str = data.decode('utf-8')
+                time.sleep(0.1)
+    
         # Simulate receiving data for demonstration purposes
-            data_str = "width:5;angle:20;dist:25;drop:0;bump:0;"
+            data_str = "width:5;angle:20;dist:25;drop:0;bump:0;"#data.decode('utf-8')
 
         # Split the data string into individual data members
             data_members = data_str.strip().split(';')
@@ -54,9 +69,9 @@ class App:
         # Check if all required data members are present in the dictionary
             if all(key in data_dict for key in ('width', 'angle', 'dist')):
             # Extract the required data from the dictionary
-                width = float(data_dict['width'])
-                angle = float(data_dict['angle'])
-                dist = float(data_dict['dist'])
+                self.width = float(data_dict['width'])
+                self.angle = float(data_dict['angle'])
+                self.dist = float(data_dict['dist'])
 
             # Create a new object with the data members
                 if self.ax.lines:
@@ -67,13 +82,13 @@ class App:
                 else:
                     color = 'g'
 
-            self.ax.plot([angle, angle], [0, dist], linewidth=width, color=color, alpha=1.0)
-            self.ax.plot([angle], [dist], marker='o', markersize=5, color=color, alpha=1.0)
+            self.ax.plot([self.angle, self.angle], [0, self.dist], linewidth=self.width, color=color, alpha=1.0)
+            self.ax.plot([self.angle], [self.dist], marker='o', markersize=5, color=color, alpha=1.0)
 
-            x = dist * np.cos(np.radians(angle))
-            y = dist * np.sin(np.radians(angle))
+            x = self.dist * np.cos(np.radians(self.angle))
+            y = self.dist * np.sin(np.radians(self.angle))
 
-            self.ax.plot([np.radians(angle)], [dist], marker='o', markersize=5, color='b', alpha=1.0)
+            self.ax.plot([np.radians(self.angle)], [self.dist], marker='o', markersize=5, color='b', alpha=1.0)
 
             # Append the x and y values to the lists
             self.xdata.append(x)
@@ -81,14 +96,15 @@ class App:
 
             # Redraw the plot with the updated data
             self.ax.plot(self.xdata, self.ydata, 'r-')
+            time.sleep(5.0)
             self.canvas.draw_idle()
 
             # Create a data object and do something with it, such as store it in a list or pass it to another function
-            data_obj = {'width': width, 'angle': angle, 'dist': dist}
-            print(data_obj)
+            self.data_obj = {'width': self.width, 'angle': self.angle, 'dist': self.dist}
+            print(self.data_obj)
 
         # Wait for a short period before checking for new data
-        time.sleep(0.1)
+        time.sleep(1.1)
 
 
     def send(self, event):
