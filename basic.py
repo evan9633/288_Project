@@ -1,31 +1,32 @@
-import tkinter as tk
 import socket
 import threading
 import time
-
+import tkinter as tk
+import numpy as np
+import matplotlib
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib import pyplot as plt
 class App:
     def __init__(self, master):
         self.master = master
         self.frame = tk.Frame(self.master)
-        self.frame.pack()
+        self.frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
         self.quit_button = tk.Button(self.frame, text="Quit", command=self.quit)
         self.quit_button.pack(side=tk.BOTTOM)
 
         self.text_box = tk.Text(self.frame)
-        self.text_box.pack()
+        self.text_box.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
         self.text_box.bind("<Key>", self.send)
 
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.connect(('192.168.1.1', 288))
-
-        ax.set_ylim([-10,10]) # set y-axis limits
-        ax.set_xlim([-10,10]) # set x-axis limits
-        
-        self.receive_thread = threading.Thread(target=self.receive_data)
-        self.receive_thread.start()
-
         self.fig, self.ax = plt.subplots(subplot_kw={'projection': 'polar'})
+        plt.ion()  # enable interactive mode
+        self.xdata = []
+        self.ydata = []
+        self.ax.set_ylim([-10,10]) # set y-axis limits
+        self.ax.set_xlim([-10,10]) # set x-axis limits
+        self.canvas = matplotlib.backends.backend_tkagg.FigureCanvasTkAgg(self.fig, master=self.frame)
+        self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
         self.data_obj = None
         self.width = None
@@ -34,65 +35,61 @@ class App:
         self.drop = None
         self.bump = None
 
+
     def receive_data(self):
         while True:
-            data = self.socket.recv(1024)
-            if not data:
-                break
-            data_str = data.decode('utf-8')
-            self.text_box.insert(tk.END, data_str)
-            self.text_box.see(tk.END)
+        # Simulate receiving data for demonstration purposes
+            data_str = "width:5;angle:20;dist:25;drop:0;bump:0;"
 
-            # wait until data is enough for a key, value pair
-            while ';' not in data_str and ':' not in data_str:
-                data += self.socket.recv(1024)
-                data_str = data.decode('utf-8')
-                time.sleep(0.1)
-
-            # split the data string into individual data members
+        # Split the data string into individual data members
             data_members = data_str.strip().split(';')
+            data_dict = {}
+
+        # Parse each data member and store it in a dictionary
             for member in data_members:
-                # split each data member into its key and value
                 if ':' in member:
                     key, value = member.strip().split(':')
-                    if key == 'width':
-                        self.width = float(value)
-                    elif key == 'angle':
-                        self.angle = float(value)
-                    elif key == 'dist':
-                        self.dist = float(value)
-                    elif key == 'drop':
-                        self.drop = True
-                    elif key == 'bump':
-                        self.drop = str(value)
+                    data_dict[key] = value
 
-            # check if all data members have been received and process them
-            if 'dist' in locals() and 'angle' in locals() and dist is not None and angle is not None:
-                # create a new object with the data members
+        # Check if all required data members are present in the dictionary
+            if all(key in data_dict for key in ('width', 'angle', 'dist')):
+            # Extract the required data from the dictionary
+                width = float(data_dict['width'])
+                angle = float(data_dict['angle'])
+                dist = float(data_dict['dist'])
+
+            # Create a new object with the data members
                 if self.ax.lines:
                     self.ax.lines[-1].set_alpha(0.5)
 
-                if tape is not None:
+                if 'tape' in data_dict:
                     color = 'r'
                 else:
                     color = 'g'
-                
-                x = dist * np.cos(np.radians(angle))
-                y = dist * np.sin(np.radians(angle))
 
-                self.ax.plot([angle, angle], [0, dist], linewidth=width, color=color, alpha=1.0)
-                self.ax.plot([angle], [dist], marker='o', markersize=5, color=color, alpha=1.0)
+            self.ax.plot([angle, angle], [0, dist], linewidth=width, color=color, alpha=1.0)
+            self.ax.plot([angle], [dist], marker='o', markersize=5, color=color, alpha=1.0)
 
-                plt.draw()
-                self.data_obj = {'width': self.width, 'angle': self.angle, 'dist': self.dist}
-                # do something with the data object, such as store it in a list or pass it to another function
-                print(self.data_obj)
-                # reset the data members to None for the next data object
-                self.width = None
-                self.angle = None
-                self.dist = None
-                self.drop = None
-                self.drop = None
+            x = dist * np.cos(np.radians(angle))
+            y = dist * np.sin(np.radians(angle))
+
+            self.ax.plot([np.radians(angle)], [dist], marker='o', markersize=5, color='b', alpha=1.0)
+
+            # Append the x and y values to the lists
+            self.xdata.append(x)
+            self.ydata.append(y)
+
+            # Redraw the plot with the updated data
+            self.ax.plot(self.xdata, self.ydata, 'r-')
+            self.canvas.draw_idle()
+
+            # Create a data object and do something with it, such as store it in a list or pass it to another function
+            data_obj = {'width': width, 'angle': angle, 'dist': dist}
+            print(data_obj)
+
+        # Wait for a short period before checking for new data
+        time.sleep(0.1)
+
 
     def send(self, event):
         key = event.char
@@ -106,4 +103,6 @@ class App:
 if __name__ == '__main__':
     root = tk.Tk()
     app = App(root)
+    app.receive_thread = threading.Thread(target=app.receive_data)
+    app.receive_thread.start()
     root.mainloop()

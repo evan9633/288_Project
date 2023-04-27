@@ -1,8 +1,8 @@
 import tkinter as tk
 import socket
 import threading
+import time
 import matplotlib.pyplot as plt
-import numpy as np
 
 class App:
     def __init__(self, master):
@@ -17,77 +17,86 @@ class App:
         self.text_box.pack()
         self.text_box.bind("<Key>", self.send)
 
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.connect(('192.168.1.1', 288))
+        #self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #self.socket.connect(('192.168.1.1', 288))
 
+        
         self.receive_thread = threading.Thread(target=self.receive_data)
         self.receive_thread.start()
-      #  self.width = None
+
+        self.fig, self.ax = plt.subplots(subplot_kw={'projection': 'polar'})
+
+        self.ax.set_ylim([-10,10]) # set y-axis limits
+        self.ax.set_xlim([-10,10]) # set x-axis limits
+        self.canvas = self.fig.canvas
+        self.canvas.draw
+        self.data_obj = None
+        self.width = None
         self.angle = None
         self.dist = None
-        self.tape = None
+        self.drop = None
+        self.bump = None
 
     def receive_data(self):
         while True:
-            data_bfr = ''
-            data = self.socket.recv(1024)
-            if not data:
-                break
-            data_str = data.decode('utf-8')
-            data_bfr += data_str
+            #data = self.socket.recv(1024)
+           # if not data:
+           #     break
+            data_str = "width:5;angle:20;dist:25;drop:0;bump:0;"#data.decode('utf-8')
             self.text_box.insert(tk.END, data_str)
             self.text_box.see(tk.END)
+            #data_str = 
+            # wait until data is enough for a key, value pair
+            while ';' not in data_str and ':' not in data_str:
+                #data += self.socket.recv(1024)
+                #data_str = data.decode('utf-8')
+                time.sleep(0.1)
 
             # split the data string into individual data members
             data_members = data_str.strip().split(';')
-
-            if not data_str.endswith(';'):
-                data_bfr = data_members.pop()
-
-            #member_list = data_str.strip().split(':')
-                # initialize plot
-            fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
-            ax.set_ylim([-10,10]) # set y-axis limits
-            ax.set_xlim([-10,10]) # set x-axis limits
-           
             for member in data_members:
                 # split each data member into its key and value
-                key, value = member.strip().split(':')
-                if key == 'width':
-                   self.width = float(value)
-                elif key == 'angle':
-                    self.angle = float(value)
-                elif key == 'dist':
-                    self.dist = float(value)
-                elif key == 'tape':
-                    self.tape = str(value)
-                
-                if self.angle is not None:
-                    x = dist * np.cos(np.radians(angle))
-                if self.angle is not None:
-                    y = dist * np.sin(np.radians(angle))
-                if self.angle is not None:
-                    ax.plot([0, x], [0, y], linewidth=width, alpha=0.5)
-                
-                #plot coordinates in real time
-
-                self.anim = animation.FuncAnimation(self.fig, self.update_plot, interval=1, blit=True)
-
-                #update plot
-
+                if ':' in member:
+                    key, value = member.strip().split(':')
+                    if key == 'width':
+                        self.width = float(value)
+                    elif key == 'angle':
+                        self.angle = float(value)
+                    elif key == 'dist':
+                        self.dist = float(value)
+                    elif key == 'drop':
+                        self.drop = True
+                    elif key == 'bump':
+                        self.drop = str(value)
 
             # check if all data members have been received and process them
-            if self.width is not None and self.angle is not None and self.dist is not None:
+            if 'dist' in locals() and 'angle' in locals() and dist is not None and angle is not None:
                 # create a new object with the data members
-                data_obj = {'width': self.width, 'angle': self.angle, 'dist': self.dist}
+                if self.ax.lines:
+                    self.ax.lines[-1].set_alpha(0.5)
+
+                if tape is not None:
+                    color = 'r'
+                else:
+                    color = 'g'
+                
+                x = dist * np.cos(np.radians(angle))
+                y = dist * np.sin(np.radians(angle))
+
+                self.ax.plot([angle, angle], [0, dist], linewidth=width, color=color, alpha=1.0)
+                self.ax.plot([angle], [dist], marker='o', markersize=5, color=color, alpha=1.0)
+
+                plt.draw()
+                self.data_obj = {'width': self.width, 'angle': self.angle, 'dist': self.dist}
                 # do something with the data object, such as store it in a list or pass it to another function
-                print(data_obj)
+                print(self.data_obj)
                 # reset the data members to None for the next data object
                 self.width = None
                 self.angle = None
                 self.dist = None
+                self.drop = None
+                self.drop = None
 
-        plt.show()
     def send(self, event):
         key = event.char
         if key:
@@ -100,5 +109,6 @@ class App:
 if __name__ == '__main__':
     root = tk.Tk()
     app = App(root)
+    app.receive_thread = threading.Thread(target=app.receive_data)
+    app.receive_thread.start()
     root.mainloop()
-    
