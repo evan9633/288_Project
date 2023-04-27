@@ -23,8 +23,8 @@ class App:
         plt.ion()  # enable interactive mode
         self.xdata = []
         self.ydata = []
-        self.ax.set_ylim([-10,10]) # set y-axis limits
-        self.ax.set_xlim([-10,10]) # set x-axis limits
+        self.ax.set_ylim([-100,100]) # set y-axis limits
+        self.ax.set_xlim([-100,100]) # set x-axis limits
         self.canvas = matplotlib.backends.backend_tkagg.FigureCanvasTkAgg(self.fig, master=self.frame)
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
@@ -48,12 +48,12 @@ class App:
            #     break
 
 
-            while ';' not in data_str and ':' not in data_str:
+           # while ';' not in data_str and ':' not in data_str:
                 #data += self.socket.recv(1024)
                 #data_str = data.decode('utf-8')
-                time.sleep(0.1)
+            #    time.sleep(0.1)
     
-        # Simulate receiving data for demonstration purposes
+            # Simulate receiving data for demonstration purposes
             data_str = "width:5;angle:20;dist:25;drop:0;bump:0;"#data.decode('utf-8')
 
         # Split the data string into individual data members
