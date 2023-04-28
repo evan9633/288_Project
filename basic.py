@@ -79,8 +79,8 @@ class App:
             self.dist = float(data_dict['dist'])
 
             # Create a new object with the data members
-            if self.ax.lines:
-                self.ax.lines[-1].set_alpha(0.5)
+            #if self.ax.lines:
+              #  self.ax.lines[-1].set_alpha(0.5)
 
             color = 'b'
             MAX_CIRCLE_SIZE = 12
@@ -88,8 +88,8 @@ class App:
             circle_size = min(self.width, MAX_CIRCLE_SIZE)
             if circle_size == MAX_CIRCLE_SIZE:
                 color = 'r'
-            self.dist +=2
-            circle = plt.Circle((np.radians(self.angle), self.dist+2), circle_size, color=color, alpha=1.0)
+            #self.dist +=2
+            circle = plt.Circle((np.radians(self.angle), self.dist), circle_size, color=color, alpha=1.0)
             self.ax.add_artist(circle)
             self.canvas.draw_idle()
 
@@ -104,10 +104,10 @@ class App:
            # for circle in self.ax.artists:
             #    self.ax.add_artist(circle)
             #self.canvas.draw_idle()          
-            time.sleep(0.1)
+            time.sleep(5)
             #self.ax.set_ylim([0, MAX_CIRCLE_SIZE * 1.2])
             # Create a data object and do something with it, such as store it in a list or pass it to another function
-            self.data_obj = {'width': self.width, 'angle': self.angle, 'dist': self.dist+2}
+            self.data_obj = {'width': self.width, 'angle': self.angle, 'dist': self.dist}
             print(self.data_obj)
 
         # Wait for a short period before checking for new data
