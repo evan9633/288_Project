@@ -20,11 +20,11 @@ class App:
         self.text_box.bind("<Key>", self.send)
 
         self.fig, self.ax = plt.subplots(subplot_kw={'projection': 'polar'})
-        plt.ion()  # enable interactive mode
+        #plt.ion()  # enable interactive mode
         self.xdata = []
         self.ydata = []
-        self.ax.set_ylim([-100,100]) # set y-axis limits
-        self.ax.set_xlim([-100,100]) # set x-axis limits
+        self.ax.set_ylim([0,150]) # set y-axis limits
+        self.ax.set_xlim([0,180]) # set x-axis limits
         self.canvas = matplotlib.backends.backend_tkagg.FigureCanvasTkAgg(self.fig, master=self.frame)
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
@@ -42,69 +42,76 @@ class App:
         plt.show
 
     def receive_data(self):
+        start_time = time.time()
         while True:
             data = self.socket.recv(1024)
+            print(data)
             if not data:
                 break
+            if time.time() - start_time > 50:
+                break
 
-
+        data_str = data.decode('utf-8')#"width:5;angle:20;dist:25;drop:0;bump:0;"        
         while ';' not in data_str and ':' not in data_str:
             data += self.socket.recv(1024)
             data_str = data.decode('utf-8')
             time.sleep(0.1)
-    
+            #print(data)
             # Simulate receiving data for demonstration purposes
-            data_str = data.decode('utf-8')#"width:5;angle:20;dist:25;drop:0;bump:0;"
+            
 
         # Split the data string into individual data members
-            data_members = data_str.strip().split(';')
-            data_dict = {}
+        data_members = data_str.strip().split(';')
+        data_dict = {}
 
         # Parse each data member and store it in a dictionary
-            for member in data_members:
-                if ':' in member:
-                    key, value = member.strip().split(':')
-                    data_dict[key] = value
+            #print(data_members)
+        for member in data_members:
+            if ':' in member:
+                key, value = member.strip().split(':')
+                data_dict[key] = value
 
         # Check if all required data members are present in the dictionary
-            if all(key in data_dict for key in ('width', 'angle', 'dist')):
+        if all(key in data_dict for key in ('width', 'angle', 'dist')):
             # Extract the required data from the dictionary
-                self.width = float(data_dict['width'])
-                self.angle = float(data_dict['angle'])
-                self.dist = float(data_dict['dist'])
+            self.width = float(data_dict['width'])
+            self.angle = float(data_dict['angle'])
+            self.dist = float(data_dict['dist'])
 
             # Create a new object with the data members
-                if self.ax.lines:
-                    self.ax.lines[-1].set_alpha(0.5)
+            if self.ax.lines:
+                self.ax.lines[-1].set_alpha(0.5)
 
-                if 'tape' in data_dict:
-                    color = 'r'
-                else:
-                    color = 'g'
-
-            self.ax.plot([self.angle, self.angle], [0, self.dist], linewidth=self.width, color=color, alpha=1.0)
-            self.ax.plot([self.angle], [self.dist], marker='o', markersize=5, color=color, alpha=1.0)
-
-            x = self.dist * np.cos(np.radians(self.angle))
-            y = self.dist * np.sin(np.radians(self.angle))
-
-            self.ax.plot([np.radians(self.angle)], [self.dist], marker='o', markersize=5, color='b', alpha=1.0)
-
-            # Append the x and y values to the lists
-            self.xdata.append(x)
-            self.ydata.append(y)
-
-            # Redraw the plot with the updated data
-            self.ax.plot(self.xdata, self.ydata, 'r-')
-            time.sleep(5.0)
+            color = 'b'
+            MAX_CIRCLE_SIZE = 12
+            #self.ax.plot([self.angle, self.angle], [0, self.dist], linewidth=, color=color, alpha=1.0)
+            circle_size = min(self.width, MAX_CIRCLE_SIZE)
+            if circle_size == MAX_CIRCLE_SIZE:
+                color = 'r'
+            self.dist +=2
+            circle = plt.Circle((np.radians(self.angle), self.dist+2), circle_size, color=color, alpha=1.0)
+            self.ax.add_artist(circle)
             self.canvas.draw_idle()
 
+           
+
+            # Append the x and y values to the lists
+            #self.xdata.append(x)
+            #self.ydata.append(y)
+
+            # Redraw the plot with the updated data
+            #self.ax.clear()
+           # for circle in self.ax.artists:
+            #    self.ax.add_artist(circle)
+            #self.canvas.draw_idle()          
+            time.sleep(0.1)
+            #self.ax.set_ylim([0, MAX_CIRCLE_SIZE * 1.2])
             # Create a data object and do something with it, such as store it in a list or pass it to another function
-            self.data_obj = {'width': self.width, 'angle': self.angle, 'dist': self.dist}
+            self.data_obj = {'width': self.width, 'angle': self.angle, 'dist': self.dist+2}
             print(self.data_obj)
 
         # Wait for a short period before checking for new data
-        time.sleep(1.1)
+        time.sleep(0.5)
 
 
     def send(self, event):
