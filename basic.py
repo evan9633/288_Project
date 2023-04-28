@@ -35,26 +35,26 @@ class App:
         self.drop = None
         self.bump = None
 
-         #self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        #self.socket.connect(('192.168.1.1', 288))
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.connect(('192.168.1.1', 288))
         self.receive_thread = threading.Thread(target=self.receive_data)
         self.receive_thread.start()
         plt.show
 
     def receive_data(self):
         while True:
-            #data = self.socket.recv(1024)
-           # if not data:
-           #     break
+            data = self.socket.recv(1024)
+            if not data:
+                break
 
 
-           # while ';' not in data_str and ':' not in data_str:
-                #data += self.socket.recv(1024)
-                #data_str = data.decode('utf-8')
-            #    time.sleep(0.1)
+        while ';' not in data_str and ':' not in data_str:
+            data += self.socket.recv(1024)
+            data_str = data.decode('utf-8')
+            time.sleep(0.1)
     
             # Simulate receiving data for demonstration purposes
-            data_str = "width:5;angle:20;dist:25;drop:0;bump:0;"#data.decode('utf-8')
+            data_str = data.decode('utf-8')#"width:5;angle:20;dist:25;drop:0;bump:0;"
 
         # Split the data string into individual data members
             data_members = data_str.strip().split(';')
