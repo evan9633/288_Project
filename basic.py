@@ -23,11 +23,12 @@ class App:
         #plt.ion()  # enable interactive mode
         self.xdata = []
         self.ydata = []
-        self.ax.set_ylim([0,150]) # set y-axis limits
-        self.ax.set_xlim([0,180]) # set x-axis limits
+        self.ax.set_ylim([0,90]) # set y-axis limits #size of graph
+        #self.ax.set_xlim([0,180]) # set x-axis limits
         self.canvas = matplotlib.backends.backend_tkagg.FigureCanvasTkAgg(self.fig, master=self.frame)
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-
+        self.ax.set_thetamin(0)
+        self.ax.set_thetamax(180)
         self.data_obj = None
         self.width = None
         self.angle = None
@@ -40,6 +41,8 @@ class App:
         self.receive_thread = threading.Thread(target=self.receive_data)
         self.receive_thread.start()
         plt.show
+        #self.master.bind("<Key-W>", self.reset)
+
 
     def receive_data(self):
         start_time = time.time()
@@ -48,50 +51,49 @@ class App:
             print(data)
             if not data:
                 break
-            if time.time() - start_time > 50:
-                break
+            
 
-        data_str = data.decode('utf-8')#"width:5;angle:20;dist:25;drop:0;bump:0;"        
-        while ';' not in data_str and ':' not in data_str:
-            data += self.socket.recv(1024)
-            data_str = data.decode('utf-8')
-            time.sleep(0.1)
+            data_str = data.decode('utf-8')#"width:5;angle:20;dist:25;drop:0;bump:0;"        
+            while ';' not in data_str and ':' not in data_str:
+                data += self.socket.recv(1024)
+                data_str = data.decode('utf-8')
+                time.sleep(0.1)
             #print(data)
             # Simulate receiving data for demonstration purposes
             
 
         # Split the data string into individual data members
-        data_members = data_str.strip().split(';')
-        data_dict = {}
+            data_members = data_str.strip().split(';')
+            data_dict = {}
 
         # Parse each data member and store it in a dictionary
             #print(data_members)
-        for member in data_members:
-            if ':' in member:
-                key, value = member.strip().split(':')
-                data_dict[key] = value
+            for member in data_members:
+                if ':' in member:
+                    key, value = member.strip().split(':')
+                    data_dict[key] = value
 
         # Check if all required data members are present in the dictionary
-        if all(key in data_dict for key in ('width', 'angle', 'dist')):
+            if all(key in data_dict for key in ('width', 'angle', 'dist')):
             # Extract the required data from the dictionary
-            self.width = float(data_dict['width'])
-            self.angle = float(data_dict['angle'])
-            self.dist = float(data_dict['dist'])
+                self.width = float(data_dict['width'])
+                self.angle = float(data_dict['angle'])
+                self.dist = float(data_dict['dist'])
 
             # Create a new object with the data members
             #if self.ax.lines:
               #  self.ax.lines[-1].set_alpha(0.5)
 
-            color = 'b'
-            MAX_CIRCLE_SIZE = 12
+                color = 'b'
+                MAX_CIRCLE_SIZE = 12
             #self.ax.plot([self.angle, self.angle], [0, self.dist], linewidth=, color=color, alpha=1.0)
-            circle_size = min(self.width, MAX_CIRCLE_SIZE)
-            if circle_size == MAX_CIRCLE_SIZE:
-                color = 'r'
+                circle_size = min(self.width, MAX_CIRCLE_SIZE)
+                if circle_size == MAX_CIRCLE_SIZE:
+                    color = 'r'
             #self.dist +=2
-            circle = plt.Circle((np.radians(self.angle), self.dist), circle_size, color=color, alpha=1.0)
-            self.ax.add_artist(circle)
-            self.canvas.draw_idle()
+                circle = plt.Circle((np.radians(self.angle), self.dist), 1, color=color, alpha=1.0)
+                self.ax.add_artist(circle)
+                self.canvas.draw_idle()
 
            
 
@@ -104,7 +106,7 @@ class App:
            # for circle in self.ax.artists:
             #    self.ax.add_artist(circle)
             #self.canvas.draw_idle()          
-            time.sleep(5)
+            time.sleep(0.9)
             #self.ax.set_ylim([0, MAX_CIRCLE_SIZE * 1.2])
             # Create a data object and do something with it, such as store it in a list or pass it to another function
             self.data_obj = {'width': self.width, 'angle': self.angle, 'dist': self.dist}
